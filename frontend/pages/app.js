@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BsFillArrowUpRightCircleFill } from "react-icons/bs";
 import { BsPlusCircleDotted } from "react-icons/bs";
 import { BiSolidDashboard } from "react-icons/bi";
@@ -12,6 +12,7 @@ import { useAccount } from "wagmi";
 
 export default function App() {
   const { open, close } = useWeb3Modal();
+  const [wait, setWait] = useState(false);
   const [text, setText] = useState("All Streams");
   const [dash, setDash] = useState(true);
   const [wrap, setWrap] = useState(false);
@@ -21,6 +22,12 @@ export default function App() {
   async function connect() {
     await open();
   }
+
+  useEffect(() => {
+    setWait(true);
+  });
+
+  if (!wait) return null;
   return (
     <div className="">
       <div className="flex px-20 desktop:px-40 py-4  items-center justify-between gap-1 border-b-[2px] border-black">
