@@ -26,7 +26,7 @@ const Dashboard = () => {
 
             <div className='flex gap-10 mt-5 items-center'>
               <Image
-                src='/dai.svg'
+                src='/usdt.png'
                 height={40}
                 width={40}
                 alt='token'
@@ -35,15 +35,15 @@ const Dashboard = () => {
 
               <HiMiniArrowsRightLeft
                 size={25}
-                color='#9FF3FF'
+                className='text-green-400'
               />
 
               <Image
-                src='/dai.svg'
+                src='/usdt.png'
                 height={40}
                 width={40}
                 alt='token'
-                className='border-green-500 border-[2px] rounded-full'
+                className='border-yellow-500 border-[2px] rounded-full'
               />
             </div>
           </div>
