@@ -1,74 +1,137 @@
-import { useState } from "react";
-export default function Stream({ connected, connect }) {
-  const [timePeriod, setTimePeriod] = useState("");
+import React, { useState } from 'react';
 
-  const sendStream = () => {
-    try {
-      let formattedFlowRate = document.getElementById("flowrate").value;
-      if (timePeriod === "minute") {
-        formattedFlowRate /= 60;
-      } else if (timePeriod === "hour") {
-        formattedFlowRate /= 60 * 60;
-      } else if (timePeriod === "day") {
-        formattedFlowRate /= 24 * 60 * 60;
-      } else if (timePeriod === "month") {
-        formattedFlowRate /= 30 * 24 * 60 * 60;
-      }
-    } catch (err) {
-      console.log(err);
-    }
+const StreamComp = ({ connected, connect }) => {
+  const [streamDetails, setStreamDetails] = useState({
+    reciever: '',
+    flowRate: '',
+    selectedType: '',
+  });
+
+  const streamHandler = () => {
+    console.log('stream logic here');
   };
 
+  // const sendStream = () => {
+  //   try {
+  //     let formattedFlowRate = document.getElementById('flowrate').value;
+  //     if (timePeriod === 'minute') {
+  //       formattedFlowRate /= 60;
+  //     } else if (timePeriod === 'hour') {
+  //       formattedFlowRate /= 60 * 60;
+  //     } else if (timePeriod === 'day') {
+  //       formattedFlowRate /= 24 * 60 * 60;
+  //     } else if (timePeriod === 'month') {
+  //       formattedFlowRate /= 30 * 24 * 60 * 60;
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
+
   return (
-    <div className="flex flex-col items-center">
-      <div className="border-[3px] border-gray-400 rounded-xl mt-16 w-[50%] py-7 px-8">
-        <p className="text-black text-xl font-bold">Send Stream</p>
-        <div className="mt-4">
-          <p className="text-lg">Receiver Wallet Address</p>
-          <input
-            type="text"
-            placeholder="Enter Wallet Address"
-            className="rounded-lg text-lg py-2 px-2 w-full border-[3px] border-gray-300 focus:outline-none mt-2"
-          />
-        </div>
-        <div className="mt-4">
-          <p className="text-lg">Flow Rate</p>
-          <div className="flex gap-3">
+    <>
+      <main className=' min-h-screen  py-28'>
+        <div className='w-fit mx-auto'>
+          <form
+            onSubmit={streamHandler}
+            className='flex flex-col font-Poppins w-[650px] bg-[#151515] text-gray-200 shadow-2xl rounded-2xl p-10 mx-auto '>
+            <div className='bg-green-700/30 text-green-300 py-2 px-3 text-sm rounded-md w-fit mb-8'>
+              Send stream
+            </div>
+            <label
+              htmlFor='reciever_address'
+              className='mb-1 text-sm text-gray-400'>
+              Reciever Address
+            </label>
             <input
-              type="text"
-              placeholder="Flow Rate"
-              className=" rounded-lg text-lg py-2 px-2 w-full border-[3px] border-gray-300 focus:outline-none mt-2 "
-              id="flowrate"
-            />
-            <select
-              className="  flex items-center border-[3px] border-gray-300 p-2 px-4 rounded-md justify-center outline-none mt-2"
+              required
+              className=' py-3 px-2 rounded-md bg-[#1b1b1b] mb-7 outline-none placeholder:text-gray-600'
+              id='reciever'
+              placeholder='0x00..'
               onChange={(e) => {
-                setTimePeriod(e.target.value);
+                setStreamDetails({
+                  ...streamDetails,
+                  reciever: e.target.value,
+                });
               }}
-            >
-              <option value="second">/second</option>
-              <option value="minute">/minute</option>
-              <option value="hour">/hour</option>
-              <option value="day">/day</option>
-              <option value="month">/month</option>
-            </select>
-          </div>
+              value={streamDetails.reciever}
+            />
+
+            <div className='flex gap-10'>
+              <div className='flex flex-col'>
+                <label
+                  htmlFor='flow'
+                  className='mb-1 text-sm text-gray-400'>
+                  Flow Rate
+                </label>
+                <input
+                  required
+                  className=' w-[330px] py-3 px-2 rounded-md bg-[#1b1b1b] outline-none mb-7 placeholder:text-gray-600'
+                  id='flow'
+                  placeholder='0.001'
+                  onChange={(e) => {
+                    setStreamDetails({
+                      ...streamDetails,
+                      flowRate: e.target.value,
+                    });
+                  }}
+                  value={streamDetails.flowRate}
+                />
+              </div>
+
+              <div className='flex flex-col'>
+                <label className='mb-1 text-sm text-gray-400'>Time Frame</label>
+                <select
+                  onChange={(e) => {
+                    setStreamDetails({
+                      ...streamDetails,
+                      selectedType: e.target.value,
+                    });
+                  }}
+                  value={streamDetails.selectedType}
+                  id='DataType'
+                  name='Type'
+                  required
+                  className=' p-3 rounded-lg w-[200px]  focus:outline-none bg-[#1b1b1b] outline-none mb-7 placeholder:text-gray-600 '>
+                  <option value='Time'>Time</option>
+                  <option value='Yearly'>/Month</option>
+                  <option value='Monthly'>/Day</option>
+                  <option value='Daily'>/Second</option>
+                </select>
+              </div>
+            </div>
+
+            <label
+              htmlFor='company'
+              className='mb-1 text-sm text-gray-400'>
+              Token
+            </label>
+            <input
+              className='py-3 px-2 rounded-md bg-[#1b1b1b] outline-none cursor-not-allowed mb-7'
+              id='company'
+              disabled
+              placeholder='xUSDT'
+            />
+
+            {connected ? (
+              <button
+                type='submit'
+                className='bg-green-700/20 text-green-500 py-3 hover:bg-green-700/40  tracking-wider   rounded-lg '>
+                Stream Token
+              </button>
+            ) : (
+              <button
+                type='button'
+                onClick={connect}
+                className='bg-green-700/20 text-green-500 py-3 hover:bg-green-700/40  tracking-wider   rounded-lg '>
+                Connect Wallet
+              </button>
+            )}
+          </form>
         </div>
-        <div>
-          {connected ? (
-            <button className="bg-[#1db227] hover:bg-green-500 tracking-wide text-[22px] px-10 py-3 rounded-lg w-full text-white mt-7">
-              Send Stream
-            </button>
-          ) : (
-            <button
-              className="bg-[#1db227] hover:bg-green-500 tracking-wide text-[22px] px-10 py-3 rounded-lg w-full text-white mt-7"
-              onClick={connect}
-            >
-              Connect Wallet
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
+      </main>
+    </>
   );
-}
+};
+
+export default StreamComp;

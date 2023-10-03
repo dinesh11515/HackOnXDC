@@ -2,17 +2,11 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { HiMenuAlt3 } from 'react-icons/hi';
 import { MdDashboard } from 'react-icons/md';
-import { FaBook, FaGamepad } from 'react-icons/fa';
-import {
-  BsMusicNoteBeamed,
-  BsPeopleFill,
-  BsPencilSquare,
-} from 'react-icons/bs';
-import { AiOutlineCodeSandbox, AiFillTrophy } from 'react-icons/ai';
+import { FaBook, FaGamepad, FaWallet } from 'react-icons/fa';
 import { IoMdSettings } from 'react-icons/io';
-import { IoExitOutline } from 'react-icons/io5';
 
 import Image from 'next/image';
+// import { useAccount } from 'wagmi';
 
 const links = [
   {
@@ -43,6 +37,8 @@ const Sidebar = () => {
   const [openMenu, setOpenMenu] = useState(false);
   // const { currentAccount } = useContext(WalletContext);
 
+  const isConnected = true;
+
   return (
     <div
       className={`bg-[#1e1e1e] min-h-screen  ${
@@ -58,23 +54,31 @@ const Sidebar = () => {
         />
       </div>
 
-      <div
-        className={`absolute top-20 flex items-center  p-1 rounded-md bg-black/30  cursor-pointer ${
-          openMenu && 'w-fit py-2 pr-2'
-        }`}>
-        <Image
-          src='/jazz.png'
-          alt='img'
-          height={35}
-          width={35}
-          className={`p-1 ${openMenu && 'mr-2'}`}
-        />
-        <p className={`${!openMenu && 'hidden'} text-lg `}>
-          {/* Kindly fix this please! */}
-          {/* {currentAccount ? accountShortner(currentAccount) : "--"} */}
-          Aman Mandal
-        </p>
-      </div>
+      {isConnected ? (
+        <div
+          className={`absolute top-20 flex items-center  p-1 rounded-md bg-black/30  cursor-pointer ${
+            openMenu && 'w-fit py-2 pr-2'
+          }`}>
+          <Image
+            src='/jazz.png'
+            alt='img'
+            height={35}
+            width={35}
+            className={`p-1 ${openMenu && 'mr-2'}`}
+          />
+          <p className={`${!openMenu && 'hidden'}  `}>0x17298....88983</p>
+        </div>
+      ) : (
+        <button
+          className={`absolute top-20 flex items-center  p-1 rounded-md bg-green-500/30 text-green-200   cursor-pointer ${
+            openMenu && 'w-fit py-2 px-2'
+          }`}>
+          <FaWallet size={20} />
+          <p className={`${!openMenu && 'hidden'} w-full ml-4 `}>
+            Connect Wallet
+          </p>
+        </button>
+      )}
 
       <div className='flex flex-col gap-4 realtive mt-40 h-[70vh]'>
         {links.map((link, i) => (

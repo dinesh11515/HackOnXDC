@@ -4,11 +4,11 @@ import { BsFillArrowUpRightCircleFill } from 'react-icons/bs';
 import { BsPlusCircleDotted } from 'react-icons/bs';
 import { BiSolidDashboard } from 'react-icons/bi';
 import Wrapper from '@/components/Wrapper';
-import Stream from '@/components/Stream';
 import Dashboard from '@/components/Dashboard';
 import { useRouter } from 'next/router';
 import { useWeb3Modal } from '@web3modal/react';
 import { useAccount } from 'wagmi';
+import StreamComp from '@/components/Stream';
 
 export default function App() {
   const { open, close } = useWeb3Modal();
@@ -97,7 +97,7 @@ export default function App() {
           />
         )}
         {send && (
-          <Stream
+          <StreamComp
             connected={connected}
             connect={connect}
           />
