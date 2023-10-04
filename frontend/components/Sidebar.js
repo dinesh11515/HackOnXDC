@@ -6,6 +6,7 @@ import { FaBook, FaGamepad, FaWallet } from 'react-icons/fa';
 import { IoMdSettings } from 'react-icons/io';
 
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 // import { useAccount } from 'wagmi';
 
 const links = [
@@ -28,7 +29,7 @@ const links = [
   {
     name: 'Settings',
     icon: <IoMdSettings size={20} />,
-    link: '/',
+    link: '/settings',
     line: true,
   },
 ];
@@ -36,6 +37,10 @@ const links = [
 const Sidebar = () => {
   const [openMenu, setOpenMenu] = useState(false);
   // const { currentAccount } = useContext(WalletContext);
+
+  const router = useRouter();
+
+  console.log('xxx', router.pathname);
 
   const isConnected = true;
 
@@ -70,7 +75,7 @@ const Sidebar = () => {
         </div>
       ) : (
         <button
-          className={`absolute top-20 flex items-center  p-1 rounded-md bg-green-500/30 text-green-200   cursor-pointer ${
+          className={`absolute top-20 flex items-center  p-1 rounded-md  bg-green-500/30 text-green-200   cursor-pointer ${
             openMenu && 'w-fit py-2 px-2'
           }`}>
           <FaWallet size={20} />
@@ -85,7 +90,9 @@ const Sidebar = () => {
           <Link
             key={link.name}
             href={link.link}
-            className={`flex gap-2 items-center font-medium  hover:bg-gray-600 rounded-md p-2 group ${
+            className={`flex gap-2 items-center font-medium ${
+              router.pathname.includes(link.link) && 'bg-green-700/40 hover:bg-green-700/50'
+            }  hover:bg-gray-700/30 rounded-md px-2 py-2 group ${
               link?.line && 'mt-auto'
             }`}>
             <div className=''>{link.icon}</div>
