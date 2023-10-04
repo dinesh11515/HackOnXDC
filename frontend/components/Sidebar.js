@@ -2,14 +2,23 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { HiMenuAlt3 } from 'react-icons/hi';
 import { MdDashboard } from 'react-icons/md';
-import { FaBook, FaGamepad, FaWallet } from 'react-icons/fa';
+import { FaWallet } from 'react-icons/fa';
+import { FaMoneyBillTrendUp } from 'react-icons/fa6';
+import { RiTokenSwapFill } from 'react-icons/ri';
+import { AiFillHome } from 'react-icons/ai';
 import { IoMdSettings } from 'react-icons/io';
 
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-// import { useAccount } from 'wagmi';
+import { useAccount } from 'wagmi';
+import { useWeb3Modal } from '@web3modal/react';
 
 const links = [
+  {
+    name: 'Home',
+    icon: <AiFillHome size={20} />,
+    link: '/',
+  },
   {
     name: 'Dashboard',
     icon: <MdDashboard size={20} />,
@@ -17,12 +26,12 @@ const links = [
   },
   {
     name: 'Stream',
-    icon: <FaGamepad size={20} />,
+    icon: <FaMoneyBillTrendUp size={20} />,
     link: '/stream',
   },
   {
     name: 'Wrap / Unwrap',
-    icon: <FaBook size={20} />,
+    icon: <RiTokenSwapFill size={20} />,
     link: '/wrap',
   },
 
@@ -39,10 +48,8 @@ const Sidebar = () => {
   // const { currentAccount } = useContext(WalletContext);
 
   const router = useRouter();
-
-  console.log('xxx', router.pathname);
-
-  const isConnected = true;
+  const { isConnected, address } = useAccount();
+  const { open } = useWeb3Modal();
 
   return (
     <div
@@ -71,10 +78,13 @@ const Sidebar = () => {
             width={35}
             className={`p-1 ${openMenu && 'mr-2'}`}
           />
-          <p className={`${!openMenu && 'hidden'}  `}>0x17298....88983</p>
+          <p className={`${!openMenu && 'hidden'}  `}>
+            {address.slice(0, 6)}....{address.slice(-6)}
+          </p>
         </div>
       ) : (
         <button
+          onClick={open}
           className={`absolute top-20 flex items-center  p-1 rounded-md  bg-green-500/30 text-green-200   cursor-pointer ${
             openMenu && 'w-fit py-2 px-2'
           }`}>
@@ -91,7 +101,8 @@ const Sidebar = () => {
             key={link.name}
             href={link.link}
             className={`flex gap-2 items-center font-medium ${
-              router.pathname.includes(link.link) && 'bg-green-700/40 hover:bg-green-700/50'
+              router.pathname === link.link &&
+              'bg-green-700/40 hover:bg-green-700/50'
             }  hover:bg-gray-700/30 rounded-md px-2 py-2 group ${
               link?.line && 'mt-auto'
             }`}>

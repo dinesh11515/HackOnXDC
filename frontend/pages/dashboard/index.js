@@ -1,117 +1,87 @@
-import Image from "next/image";
-import React from "react";
-import { BsPencilFill } from "react-icons/bs";
-import { HiMiniArrowsRightLeft } from "react-icons/hi2";
-import { MdCancel } from "react-icons/md";
-import { useWeb3Modal } from "@web3modal/react";
-import { useAccount } from "wagmi";
-import { useRouter } from "next/router";
+import WalletConnectComp from '@/components/WalletConnectComp';
+import Image from 'next/image';
+import React from 'react';
+import { MdDashboard } from 'react-icons/md';
+import { useAccount } from 'wagmi';
 
 const Dashboard = () => {
-  const router = useRouter();
   const { isConnected } = useAccount();
-  const { open, close } = useWeb3Modal();
+
+  const DUMMY_DATA = [
+    {
+      asset: 'USDT',
+      from: '0x123...456',
+      to: '0x123...456',
+      netFlow: '0.0001',
+      streamed: '0.01',
+      endDate: '12 Jun 2021',
+    },
+    {
+      asset: 'USDT',
+      from: '0x123...456',
+      to: '0x123...456',
+      netFlow: '0.0001',
+      streamed: '0.01',
+      endDate: '12 Jun 2021',
+    },
+    {
+      asset: 'USDT',
+      from: '0x123...456',
+      to: '0x123...456',
+      netFlow: '0.0001',
+      streamed: '0.01',
+      endDate: '12 Jun 2021',
+    },
+  ];
+
   return (
-    <div className="bg-[#141414] h-[100vh] text-white font-Poppins flex flex-col items-center">
-      <div className="mt-32 ">
-        <h2 className="text-center text-2xl  text-gray-100">
-          Connect to StreamX
-        </h2>
-        <p className="text-gray-500 mt-2">
-          Connect your wallet to access the whole application!
-        </p>
-      </div>
+    <div className='bg-[#141414] h-[100vh] text-white font-Poppins px-20 py-20'>
+      {isConnected ? (
+        <>
+          <div className='font-medium  mb-4 text-gray-200 flex items-center gap-3 '>
+            <MdDashboard size={20} />
+            <p>Dashboard</p>
+          </div>
 
-      <div>
-        <div className="flex gap-20 mt-10">
-          <div className="bg-[#1C1D20] w-[330px] p-8 rounded-2xl flex flex-col justify-center items-center cursor-pointer hover:bg-[#2a2c31]">
-            <h3 className="">Get Super Tokens</h3>
-            <p className="text-xs text-gray-400">
-              Wrap any token in your wallet
+          <div className='bg-[#1C1D20] pt-10  rounded-3xl overflow-hidden'>
+            <p className='font-medium text-xl text-green-400 px-10  border-b-[0.2px] pb-4 border-gray-400'>
+              Active Streams
             </p>
+            <table className='w-full text-center '>
+              <tr>
+                <th className='py-6 font-medium'>Asset</th>
+                <th className='py-6 font-medium'>From / To</th>
+                <th className='py-6 font-medium'>Net Flow</th>
+                <th className='py-6 font-medium'>Streamed</th>
+                <th className='py-6 font-medium'>End date</th>
+              </tr>
 
-            <div className="flex gap-10 mt-5 items-center">
-              <Image
-                src="/usdt.png"
-                height={40}
-                width={40}
-                alt="token"
-                className="rounded-full"
-              />
-
-              <HiMiniArrowsRightLeft size={25} className="text-green-400" />
-
-              <Image
-                src="/usdt.png"
-                height={40}
-                width={40}
-                alt="token"
-                className="border-yellow-500 border-[2px] rounded-full"
-              />
-            </div>
+              {DUMMY_DATA.map((data) => (
+                <tr className='bg-[#292a2c] hover:bg-[#2d2f31]'>
+                  <td className='py-5 '>
+                    <div className='flex justify-center items-center gap-2'>
+                      <Image
+                        src='/usdt.png'
+                        height={25}
+                        width={25}
+                        alt='usdt'
+                        className='rounded-full '
+                      />
+                      <p>{data.asset}</p>
+                    </div>
+                  </td>
+                  <td>{data.to}</td>
+                  <td>{data.netFlow}</td>
+                  <td>{data.streamed}</td>
+                  <td>{data.endDate}</td>
+                </tr>
+              ))}
+            </table>
           </div>
-
-          <div className="bg-[#1C1D20] w-[330px] p-8 rounded-2xl flex flex-col justify-center items-center cursor-pointer hover:bg-[#2a2c31]">
-            <h3 className="">Send a stream</h3>
-            <p className="text-xs text-gray-400">
-              Stream token to any address on xdc
-            </p>
-
-            <div className="flex  mt-5 items-center">
-              <Image
-                src="/jazz.png"
-                height={50}
-                width={50}
-                alt="token"
-                className="rounded-md"
-              />
-
-              <Image src="/stream.gif" height={20} width={70} alt="stream" />
-
-              <Image
-                src="/jazz2.png"
-                height={50}
-                width={50}
-                alt="token"
-                className="rounded-md"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-[#1C1D20] w-full mt-10 p-10 rounded-2xl flex flex-col justify-center items-center cursor-pointer hover:bg-[#2a2c31]">
-          <h3 className="">Modify and cancel your stream</h3>
-          <p className="text-xs text-gray-400">
-            Wanna configure your stream after creating it?
-          </p>
-
-          <div className="flex gap-10  mt-5 items-center">
-            <div className="bg-green-700/20 p-2 rounded-md">
-              <BsPencilFill className="text-green-500 text-3xl" />
-            </div>
-
-            <div className="bg-red-700/20 p-2 rounded-md">
-              <MdCancel className="text-red-500 text-3xl" />
-            </div>
-          </div>
-        </div>
-
-        {!isConnected ? (
-          <button
-            className="bg-green-500/30 text-green-200 mt-10 py-4 rounded-md w-full"
-            onClick={() => open()}
-          >
-            Connect Wallet
-          </button>
-        ) : (
-          <button
-            className="bg-green-500/30 text-green-200 mt-10 py-4 rounded-md w-full"
-            onClick={() => router.push("/stream")}
-          >
-            Start streaming
-          </button>
-        )}
-      </div>
+        </>
+      ) : (
+        <WalletConnectComp />
+      )}
     </div>
   );
 };

@@ -1,10 +1,15 @@
+import { useWeb3Modal } from '@web3modal/react';
 import Image from 'next/image';
 import React, { useState } from 'react';
 import { HiMiniArrowsUpDown } from 'react-icons/hi2';
+import { useAccount } from 'wagmi';
 
-const WrapComp = ({ connected = false, connect }) => {
+const WrapComp = () => {
   const [wrap, setWrap] = useState(true);
   const [unwrap, setUnwrap] = useState(false);
+
+  const { isConnected } = useAccount();
+  const { open } = useWeb3Modal();
 
   return (
     <div className='bg-[#1C1D20] rounded-xl w-[600px] py-10 px-6 text-white font-Poppins'>
@@ -133,7 +138,7 @@ const WrapComp = ({ connected = false, connect }) => {
 
       <p className='text-center mt-4 text-gray-300'>1 xUSDT = 1 USDT</p>
 
-      {connected ? (
+      {isConnected ? (
         <button
           type='submit'
           className='bg-green-700/20 w-full mt-8 text-green-500 py-3 hover:bg-green-700/40  tracking-wider   rounded-lg '>
@@ -142,7 +147,7 @@ const WrapComp = ({ connected = false, connect }) => {
       ) : (
         <button
           type='button'
-          onClick={connect}
+          onClick={open}
           className='bg-green-700/20 w-full mt-8 text-green-500 py-3 hover:bg-green-700/40  tracking-wider   rounded-lg '>
           Connect Wallet
         </button>
