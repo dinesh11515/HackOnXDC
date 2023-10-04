@@ -1,25 +1,42 @@
 // SPDX-License-Identifier: MIT
+// OpenZeppelin Contracts (last updated v4.9.0) (token/ERC20/ERC20.sol)
 
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
+import "./IERC20.sol";
+import "./extensions/IERC20Metadata.sol";
+import "../../utils/Context.sol";
 
-contract SuperToken is Context, IERC20, IERC20Metadata {
-    event tokenMinted(address receiver, uint value);
-    struct transaction {
-        uint flowRate;
-        uint timestamp;
-        bool isOnGoing;
-        address participant;
-    }
-    address private immutable _underToken;
-    mapping(address => transaction[]) public incomingStreams;
-    mapping(address => transaction[]) public outgoingStreams;
-
-    mapping(address => mapping(address => uint)) public tokensSentTillDate;
-    mapping(address => int256) private _balances;
+/**
+ * @dev Implementation of the {IERC20} interface.
+ *
+ * This implementation is agnostic to the way tokens are created. This means
+ * that a supply mechanism has to be added in a derived contract using {_mint}.
+ * For a generic mechanism see {ERC20PresetMinterPauser}.
+ *
+ * TIP: For a detailed writeup see our guide
+ * https://forum.openzeppelin.com/t/how-to-implement-erc20-supply-mechanisms/226[How
+ * to implement supply mechanisms].
+ *
+ * The default value of {decimals} is 18. To change this, you should override
+ * this function so it returns a different value.
+ *
+ * We have followed general OpenZeppelin Contracts guidelines: functions revert
+ * instead returning `false` on failure. This behavior is nonetheless
+ * conventional and does not conflict with the expectations of ERC20
+ * applications.
+ *
+ * Additionally, an {Approval} event is emitted on calls to {transferFrom}.
+ * This allows applications to reconstruct the allowance for all accounts just
+ * by listening to said events. Other implementations of the EIP may not emit
+ * these events, as it isn't required by the specification.
+ *
+ * Finally, the non-standard {decreaseAllowance} and {increaseAllowance}
+ * functions have been added to mitigate the well-known issues around setting
+ * allowances. See {IERC20-approve}.
+ */
+contract ERC20 is Context, IERC20, IERC20Metadata {
+    mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
 
@@ -34,17 +51,10 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        address underToken_
-    ) {
+    constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
-        _underToken = underToken_;
     }
-
-    /* VIEW FUCNTIONS */
 
     /**
      * @dev Returns the name of the token.
@@ -88,181 +98,8 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
     /**
      * @dev See {IERC20-balanceOf}.
      */
-    function balanceOf(
-        address account
-    ) public view virtual override returns (uint256) {
-        uint incomingBalance = 0;
-        uint outgoingBalance = 0;
-
-        /**
-         * calculate the total balance that has been streamed to you by now
-         */
-        for (uint i = 0; i < incomingStreams[account].length; i++) {
-            if (incomingStreams[account][i].isOnGoing == true) {
-                incomingBalance +=
-                    (block.timestamp - incomingStreams[account][i].timestamp) *
-                    incomingStreams[account][i].flowRate;
-            }
-        }
-
-        /**
-         * calculate the total balance that has been stream from you by now
-         */
-        for (uint i = 0; i < outgoingStreams[account].length; i++) {
-            if (outgoingStreams[account][i].isOnGoing == true) {
-                outgoingBalance +=
-                    (block.timestamp - outgoingStreams[account][i].timestamp) *
-                    outgoingStreams[account][i].flowRate;
-            }
-        }
-
-        /**
-         * outgoing balance <= incoming balance + static balance
-         */
-        // if(outgoingBalance > incomingBalance + balance[msg.sender]) {
-        // do something
-        // }
-
-        int userBalance = ((_balances[account] + int(incomingBalance)) -
-            int(outgoingBalance));
-
-        if (userBalance < 0) {
-            return 0;
-        }
-
-        return uint(userBalance);
-    }
-
-    /**
-     * @dev See {IERC20-allowance}.
-     */
-    function allowance(
-        address owner,
-        address spender
-    ) public view virtual override returns (uint256) {
-        return _allowances[owner][spender];
-    }
-
-    /**
-     * send real token in the contract to receive the 1:1 Super token (wrap tokens)
-     */
-    function wrap(uint _amount) external {
-        require(
-            IERC20(_underToken).transferFrom(
-                msg.sender,
-                address(this),
-                _amount
-            ),
-            "wrap Transfer Failed"
-        );
-        _mint(msg.sender, _amount);
-
-        emit tokenMinted(msg.sender, _amount);
-    }
-
-    /**
-     * send super tokens back to the smart contract to unwrap it to erc20 token
-     * @param _amount  the amount of tokens you want to burn
-     */
-    function unwrap(uint _amount) external {
-        _burn(msg.sender, _amount);
-        require(
-            IERC20(_underToken).transferFrom(
-                address(this),
-                msg.sender,
-                _amount
-            ),
-            "Unwrap Transfer Failed"
-        );
-    }
-
-    /**
-     *
-     * @param _flowRate is the flowRate per second
-     * @param _receiver is the address of the receiver
-     */
-    function createStream(uint _flowRate, address _receiver) external {
-        //check if user has enough balance to start a stream for 10 sec
-        require(balanceOf(msg.sender) > _flowRate * 10, "NOT ENOUGH BALANCE");
-
-        transaction[] memory currentlyOutgoingStreams = outgoingStreams[
-            msg.sender
-        ];
-
-        for (uint i = 0; i < currentlyOutgoingStreams.length; i++) {
-            if (
-                currentlyOutgoingStreams[i].participant == _receiver &&
-                currentlyOutgoingStreams[i].isOnGoing
-            ) {
-                revert("TRANSACTION ALREADY ONGOING");
-            } else if (
-                // stream exist but is not on going then upadte that stream only instead of creating a new one
-                currentlyOutgoingStreams[i].participant == _receiver &&
-                !currentlyOutgoingStreams[i].isOnGoing
-            ) {
-                outgoingStreams[msg.sender][i].isOnGoing = true;
-                outgoingStreams[msg.sender][i].flowRate = _flowRate;
-                outgoingStreams[msg.sender][i].timestamp = block.timestamp;
-                incomingStreams[_receiver][i].isOnGoing = true;
-                incomingStreams[_receiver][i].flowRate = _flowRate;
-                incomingStreams[_receiver][i].timestamp = block.timestamp;
-
-                return;
-            }
-        }
-        /**
-         * update the outgoing streams
-         */
-        outgoingStreams[msg.sender].push(
-            transaction(_flowRate, block.timestamp, true, _receiver)
-        );
-
-        /**
-         * update the incoming streams
-         */
-        incomingStreams[_receiver].push(
-            transaction(_flowRate, block.timestamp, true, msg.sender)
-        );
-    }
-
-    /**
-     * returns the balance between 2 parties of the current ongoing stream otherwise returns zero
-     * @param _receiver is the address of the receiver
-     */
-    function getTokensSent(address _receiver) external view returns (uint) {
-        uint tokens;
-
-        for (uint i = 0; i < outgoingStreams[msg.sender].length; i++) {
-            if (
-                outgoingStreams[msg.sender][i].participant == _receiver &&
-                outgoingStreams[msg.sender][i].isOnGoing
-            ) {
-                tokens =
-                    (block.timestamp -
-                        outgoingStreams[msg.sender][i].timestamp) *
-                    outgoingStreams[msg.sender][i].flowRate;
-                return tokens;
-            }
-        }
-
-        return 0;
-    }
-
-    function stopStream(address _receiver) external {
-        for (uint i = 0; i < outgoingStreams[msg.sender].length; i++) {
-            if (
-                outgoingStreams[msg.sender][i].participant == _receiver &&
-                outgoingStreams[msg.sender][i].isOnGoing == true
-            ) {
-                outgoingStreams[msg.sender][i].isOnGoing = false;
-                incomingStreams[_receiver][i].isOnGoing = false;
-
-                tokensSentTillDate[msg.sender][_receiver] +=
-                    (block.timestamp -
-                        outgoingStreams[msg.sender][i].timestamp) *
-                    outgoingStreams[msg.sender][i].flowRate;
-            }
-        }
+    function balanceOf(address account) public view virtual override returns (uint256) {
+        return _balances[account];
     }
 
     /**
@@ -273,13 +110,17 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      * - `to` cannot be the zero address.
      * - the caller must have a balance of at least `amount`.
      */
-    function transfer(
-        address to,
-        uint256 amount
-    ) public virtual override returns (bool) {
+    function transfer(address to, uint256 amount) public virtual override returns (bool) {
         address owner = _msgSender();
         _transfer(owner, to, amount);
         return true;
+    }
+
+    /**
+     * @dev See {IERC20-allowance}.
+     */
+    function allowance(address owner, address spender) public view virtual override returns (uint256) {
+        return _allowances[owner][spender];
     }
 
     /**
@@ -292,10 +133,7 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      *
      * - `spender` cannot be the zero address.
      */
-    function approve(
-        address spender,
-        uint256 amount
-    ) public virtual override returns (bool) {
+    function approve(address spender, uint256 amount) public virtual override returns (bool) {
         address owner = _msgSender();
         _approve(owner, spender, amount);
         return true;
@@ -317,11 +155,7 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      * - the caller must have allowance for ``from``'s tokens of at least
      * `amount`.
      */
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) public virtual override returns (bool) {
+    function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, amount);
         _transfer(from, to, amount);
@@ -340,10 +174,7 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      *
      * - `spender` cannot be the zero address.
      */
-    function increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) public virtual returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
         address owner = _msgSender();
         _approve(owner, spender, allowance(owner, spender) + addedValue);
         return true;
@@ -363,16 +194,10 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      * - `spender` must have allowance for the caller of at least
      * `subtractedValue`.
      */
-    function decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) public virtual returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool) {
         address owner = _msgSender();
         uint256 currentAllowance = allowance(owner, spender);
-        require(
-            currentAllowance >= subtractedValue,
-            "ERC20: decreased allowance below zero"
-        );
+        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
         unchecked {
             _approve(owner, spender, currentAllowance - subtractedValue);
         }
@@ -394,24 +219,19 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      * - `to` cannot be the zero address.
      * - `from` must have a balance of at least `amount`.
      */
-    function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {
+    function _transfer(address from, address to, uint256 amount) internal virtual {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
 
         _beforeTokenTransfer(from, to, amount);
 
-        uint256 fromBalance = balanceOf(msg.sender);
-        require(
-            fromBalance >= amount,
-            "ERC20: transfer amount exceeds balance"
-        );
+        uint256 fromBalance = _balances[from];
+        require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
         unchecked {
-            _balances[from] -= int(amount);
-            _balances[to] += int(amount);
+            _balances[from] = fromBalance - amount;
+            // Overflow not possible: the sum of all balances is capped by totalSupply, and the sum is preserved by
+            // decrementing then incrementing.
+            _balances[to] += amount;
         }
 
         emit Transfer(from, to, amount);
@@ -436,7 +256,7 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
         _totalSupply += amount;
         unchecked {
             // Overflow not possible: balance + amount is at most totalSupply + amount, which is checked above.
-            _balances[account] += int(amount);
+            _balances[account] += amount;
         }
         emit Transfer(address(0), account, amount);
 
@@ -459,10 +279,10 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
 
         _beforeTokenTransfer(account, address(0), amount);
 
-        uint256 accountBalance = balanceOf(msg.sender);
+        uint256 accountBalance = _balances[account];
         require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
         unchecked {
-            _balances[account] -= int(amount);
+            _balances[account] = accountBalance - amount;
             // Overflow not possible: amount <= accountBalance <= totalSupply.
             _totalSupply -= amount;
         }
@@ -485,11 +305,7 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      * - `owner` cannot be the zero address.
      * - `spender` cannot be the zero address.
      */
-    function _approve(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal virtual {
+    function _approve(address owner, address spender, uint256 amount) internal virtual {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
@@ -505,17 +321,10 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      *
      * Might emit an {Approval} event.
      */
-    function _spendAllowance(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal virtual {
+    function _spendAllowance(address owner, address spender, uint256 amount) internal virtual {
         uint256 currentAllowance = allowance(owner, spender);
         if (currentAllowance != type(uint256).max) {
-            require(
-                currentAllowance >= amount,
-                "ERC20: insufficient allowance"
-            );
+            require(currentAllowance >= amount, "ERC20: insufficient allowance");
             unchecked {
                 _approve(owner, spender, currentAllowance - amount);
             }
@@ -536,11 +345,7 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {}
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 
     /**
      * @dev Hook that is called after any transfer of tokens. This includes
@@ -556,9 +361,5 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      *
      * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
      */
-    function _afterTokenTransfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual {}
+    function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual {}
 }
