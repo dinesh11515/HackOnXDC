@@ -3,7 +3,7 @@ import StreamComp from '@/components/Stream';
 
 const Stream = () => {
   return (
-    <div className='h-[100vh] bg-[#0F0F0F] flex flex-col justify-center items-center'>
+    <div className='h-[100vh] bg-[#141414] flex flex-col justify-center items-center'>
       <StreamComp />
     </div>
   );
