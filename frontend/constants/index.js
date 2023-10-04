@@ -1,0 +1,2 @@
+export const superToken = "0xD1EABa2230a43AB8A107eed986E245cde53F6D3A";
+export const USDT = "0x7c18eB954E292105e84693ff791196095a8709F1";
