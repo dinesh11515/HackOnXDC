@@ -1,3 +1,4 @@
+import ActiveStream from '@/components/ActiveStream';
 import WalletConnectComp from '@/components/WalletConnectComp';
 import Image from 'next/image';
 import React from 'react';
@@ -9,25 +10,28 @@ const Dashboard = () => {
 
   const DUMMY_DATA = [
     {
+      id: '0qo0e-0101',
       asset: 'USDT',
       from: '0x123...456',
-      to: '0x123...456',
+      to: '0x123899...87878456',
       netFlow: '0.0001',
       streamed: '0.01',
       endDate: '12 Jun 2021',
     },
     {
+      id: '0qo0e-0101',
       asset: 'USDT',
       from: '0x123...456',
-      to: '0x123...456',
+      to: '0x123899...87878456',
       netFlow: '0.0001',
       streamed: '0.01',
       endDate: '12 Jun 2021',
     },
     {
+      id: '0qo0e-0101',
       asset: 'USDT',
-      from: '0x123...456',
-      to: '0x123...456',
+      from: '0x123899...87878456',
+      to: '0x123899...87878456',
       netFlow: '0.0001',
       streamed: '0.01',
       endDate: '12 Jun 2021',
@@ -43,7 +47,7 @@ const Dashboard = () => {
             <p>Dashboard</p>
           </div>
 
-          <div className='bg-[#1C1D20] pt-10  rounded-3xl overflow-hidden'>
+          {/* <div className='bg-[#1C1D20] pt-10  rounded-3xl overflow-hidden'>
             <p className='font-medium text-xl text-green-400 px-10  border-b-[0.2px] pb-4 border-gray-400'>
               Active Streams
             </p>
@@ -77,6 +81,12 @@ const Dashboard = () => {
                 </tr>
               ))}
             </table>
+          </div> */}
+
+          <div className='flex flex-wrap gap-10'>
+            {DUMMY_DATA.map((data) => (
+              <ActiveStream data={data} />
+            ))}
           </div>
         </>
       ) : (
