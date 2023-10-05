@@ -1,7 +1,57 @@
 import Image from "next/image";
-import React from "react";
-
+import React, { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
+import { readContract } from "@wagmi/core";
+import { ABI, superToken } from "@/constants";
+import { useRouter } from "next/router";
+import { formatEther, formatUnits } from "viem";
 const CurrentStream = ({}) => {
+  const router = useRouter();
+  const id = router.query.did;
+  const { address, isConnected } = useAccount();
+  const [hydrate, setHydrate] = useState(false);
+  const [data, setData] = useState();
+
+  const getData = async () => {
+    try {
+      const dataStr = await readContract({
+        address: superToken,
+        abi: ABI,
+        functionName: "getOutgoingStreams",
+        args: [address],
+      });
+      setData(dataStr[id]);
+      console.log(dataStr[id]);
+    } catch (e) {
+      console.log("dashboard data", e);
+    }
+  };
+
+  const btwTime = () => {
+    return BigInt(Math.floor(Date.now() / 1000)) - BigInt(data?.timestamp || 0);
+  };
+
+  const getDate = () => {
+    if (data) {
+      const timestamp = data.timestamp;
+      const timestampInMilliseconds = BigInt(timestamp) * 1000n;
+      const date = new Date(Number(timestampInMilliseconds));
+
+      // You can format the date as per your preference using Date methods
+      const formattedDate = date.toDateString(); // Converts to a string like "Tue Oct 05 2021"
+      const formattedTime = date.toLocaleTimeString(); // Converts to a string like "11:31:05 AM"
+      return [formattedDate, formattedTime];
+    }
+    return [];
+  };
+
+  console.log(btwTime());
+
+  useEffect(() => {
+    if (address) {
+      getData();
+    }
+  }, [address, id]);
   return (
     <div className="bg-[#141414] h-[100vh] flex flex-col text-white font-Poppins px-20 py-20  items-center">
       <div className="mt-28 w-[700px]">
@@ -14,7 +64,11 @@ const CurrentStream = ({}) => {
             alt="usdt"
             className="rounded-full border-2 border-yellow-400"
           />
-          <p className="text-6xl">0.89989</p>
+          <p className="text-6xl">
+            {parseFloat(
+              formatEther(BigInt(data?.flowRate || 0) * BigInt(btwTime()))
+            ).toFixed(6)}
+          </p>
           <p className="mt-4 text-green-400 text-lg">sXDC</p>
         </div>
 
@@ -33,7 +87,9 @@ const CurrentStream = ({}) => {
                 className="rounded-md"
               />
 
-              <p>0x51EE....793d</p>
+              <p>
+                {address?.slice(0, 6)}...{address?.slice(-4)}
+              </p>
             </div>
 
             <Image src="/stream.gif" height={40} width={90} alt="stream" />
@@ -46,7 +102,9 @@ const CurrentStream = ({}) => {
                 className="rounded-md"
               />
 
-              <p>0x51EE....793d</p>
+              <p>
+                {data?.participant.slice(0, 6)}...{data?.participant.slice(-4)}
+              </p>
             </div>
           </div>
         </div>
@@ -54,21 +112,18 @@ const CurrentStream = ({}) => {
         <div className="mt-28 flex w-full gap-10">
           <div className="flex-[0.5] flex flex-col gap-2">
             <p className="flex justify-between items-center text-gray-300">
-              Start Date : <span>12/10/2022</span>
+              Start Date : <span>{getDate()[0]}</span>
             </p>
             <p className="flex justify-between items-center text-gray-300">
-              Project Liquidation : <span>-</span>
+              Time :<span>{getDate()[1]}</span>
             </p>
           </div>
           <div className="flex-[0.5]  flex flex-col gap-2">
             <p className="flex justify-between items-center text-gray-300">
-              Buffer : <span>-</span>
+              flow Rate : <span>{formatEther(data?.flowRate || 0)}</span>
             </p>
             <p className="flex justify-between items-center text-gray-300">
               Network Name : <span>XDC Mainnet</span>
-            </p>
-            <p className="flex justify-between items-center text-gray-300">
-              Transaction Hash : <span>0x8989.....9834</span>
             </p>
           </div>{" "}
         </div>

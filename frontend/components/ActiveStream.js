@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { useAccount } from "wagmi";
 
-const ActiveStream = ({ data }) => {
+const ActiveStream = ({ data, index }) => {
   console.log(data);
   const { address } = useAccount();
   const router = useRouter();
@@ -11,7 +11,7 @@ const ActiveStream = ({ data }) => {
   return (
     <div
       onClick={() => {
-        router.push(`/dashboard/${data.id}`);
+        router.push(`/dashboard/${index}`);
       }}
       className="bg-[#1C1D20] pb-8 px-8 rounded-2xl w-fit font-Poppins hover:bg-[#2a2b2f] cursor-pointer"
     >

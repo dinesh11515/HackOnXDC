@@ -31,7 +31,6 @@ const Dashboard = () => {
     if (address) {
       getData();
     }
-    getData();
   }, [address]);
 
   const DUMMY_DATA = [
@@ -117,8 +116,8 @@ const Dashboard = () => {
           </div> */}
 
           <div className="flex flex-wrap gap-10">
-            {data.map((i) => (
-              <ActiveStream data={i} />
+            {data.map((i, index) => (
+              <ActiveStream data={i} index={index} />
             ))}
           </div>
         </>
