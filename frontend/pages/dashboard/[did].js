@@ -25,9 +25,9 @@ const CurrentStream = ({}) => {
           </div>
 
           <div className='flex items-center'>
-            <div className='flex gap-3 bg-[#1C1D20] py-4 px-6 rounded-lg w-[300px] items-center'>
+            <div className='flex gap-3 bg-[#1C1D20] py-4 px-6 rounded-lg w-[300px] items-center border-[0.5px] border-gray-600'>
               <Image
-                src='/gif2.gif'
+                src='/gif3.webp'
                 height={40}
                 width={40}
                 className='rounded-md'
@@ -43,7 +43,7 @@ const CurrentStream = ({}) => {
               alt='stream'
             />
 
-            <div className='flex gap-3 bg-[#1C1D20] py-4 px-6 rounded-lg w-[300px] items-center'>
+            <div className='flex gap-3 bg-[#1C1D20] py-4 px-6 rounded-lg w-[300px] items-center border-[0.5px] border-gray-600'>
               <Image
                 src='/gif2.gif'
                 height={40}

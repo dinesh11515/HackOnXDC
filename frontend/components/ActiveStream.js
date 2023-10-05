@@ -20,7 +20,7 @@ const ActiveStream = ({ data }) => {
       <div className='flex items-center'>
         <div className='flex gap-3 items-center bg-[#161719] p-2 rounded-md px-4'>
           <Image
-            src='/gif2.gif'
+            src='/gif3.webp'
             height={40}
             width={40}
             className='rounded-md'
