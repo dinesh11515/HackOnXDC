@@ -1,48 +1,81 @@
-import ActiveStream from '@/components/ActiveStream';
-import WalletConnectComp from '@/components/WalletConnectComp';
-import Image from 'next/image';
-import React from 'react';
-import { MdDashboard } from 'react-icons/md';
-import { useAccount } from 'wagmi';
+import ActiveStream from "@/components/ActiveStream";
+import WalletConnectComp from "@/components/WalletConnectComp";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
+import { MdDashboard } from "react-icons/md";
+import { useAccount } from "wagmi";
+import { readContract } from "@wagmi/core";
+import { ABI, superToken } from "@/constants";
 
 const Dashboard = () => {
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
+  const [hydrate, setHydrate] = useState(false);
+  const [data, setData] = useState([]);
+
+  const getData = async () => {
+    try {
+      const dataStr = await readContract({
+        address: superToken,
+        abi: ABI,
+        functionName: "getOutgoingStreams",
+        args: [address],
+      });
+      setData(dataStr);
+      console.log(data);
+    } catch (e) {
+      console.log("dashboard data", e);
+    }
+  };
+
+  useEffect(() => {
+    if (address) {
+      getData();
+    }
+    getData();
+  }, [address]);
 
   const DUMMY_DATA = [
     {
-      id: '0qo0e-0101',
-      asset: 'USDT',
-      from: '0x123...456',
-      to: '0x123899...87878456',
-      netFlow: '0.0001',
-      streamed: '0.01',
-      endDate: '12 Jun 2021',
+      id: "0qo0e-0101",
+      asset: "USDT",
+      from: "0x123...456",
+      to: "0x123899...87878456",
+      netFlow: "0.0001",
+      streamed: "0.01",
+      endDate: "12 Jun 2021",
     },
     {
-      id: '0qo0e-0101',
-      asset: 'USDT',
-      from: '0x123...456',
-      to: '0x123899...87878456',
-      netFlow: '0.0001',
-      streamed: '0.01',
-      endDate: '12 Jun 2021',
+      id: "0qo0e-0101",
+      asset: "USDT",
+      from: "0x123...456",
+      to: "0x123899...87878456",
+      netFlow: "0.0001",
+      streamed: "0.01",
+      endDate: "12 Jun 2021",
     },
     {
-      id: '0qo0e-0101',
-      asset: 'USDT',
-      from: '0x123899...87878456',
-      to: '0x123899...87878456',
-      netFlow: '0.0001',
-      streamed: '0.01',
-      endDate: '12 Jun 2021',
+      id: "0qo0e-0101",
+      asset: "USDT",
+      from: "0x123899...87878456",
+      to: "0x123899...87878456",
+      netFlow: "0.0001",
+      streamed: "0.01",
+      endDate: "12 Jun 2021",
     },
   ];
 
+  useEffect(() => {
+    setHydrate(true);
+  });
+  if (!hydrate) {
+    return null;
+  }
+
   return (
-    <div className='bg-[#141414] h-[100vh] text-white font-Poppins px-20 py-20'>
+    <div className="bg-[#141414] h-[100vh] text-white font-Poppins px-20 py-20">
       {isConnected ? (
         <>
-          <div className='font-medium  mb-4 text-gray-200 flex items-center gap-3 '>
+          <div className="font-medium  mb-4 text-gray-200 flex items-center gap-3 ">
             <MdDashboard size={20} />
             <p>Dashboard</p>
           </div>
@@ -83,9 +116,9 @@ const Dashboard = () => {
             </table>
           </div> */}
 
-          <div className='flex flex-wrap gap-10'>
-            {DUMMY_DATA.map((data) => (
-              <ActiveStream data={data} />
+          <div className="flex flex-wrap gap-10">
+            {data.map((i) => (
+              <ActiveStream data={i} />
             ))}
           </div>
         </>

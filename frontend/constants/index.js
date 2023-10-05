@@ -1,5 +1,4 @@
-export const superToken = "0xD1EABa2230a43AB8A107eed986E245cde53F6D3A";
-export const USDT = "0x7c18eB954E292105e84693ff791196095a8709F1";
+export const superToken = "0xfd2a0E34286A18B31187592306DD5C4b7cB3ef2b";
 export const ABI = [
   {
     inputs: [
@@ -12,11 +11,6 @@ export const ABI = [
         internalType: "string",
         name: "symbol_",
         type: "string",
-      },
-      {
-        internalType: "address",
-        name: "underToken_",
-        type: "address",
       },
     ],
     stateMutability: "nonpayable",
@@ -90,6 +84,10 @@ export const ABI = [
     ],
     name: "tokenMinted",
     type: "event",
+  },
+  {
+    stateMutability: "payable",
+    type: "fallback",
   },
   {
     inputs: [
@@ -208,6 +206,101 @@ export const ABI = [
         internalType: "bool",
         name: "",
         type: "bool",
+      },
+    ],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "address_",
+        type: "address",
+      },
+    ],
+    name: "getIncomingStreams",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "flowRate",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "isOnGoing",
+            type: "bool",
+          },
+          {
+            internalType: "address",
+            name: "participant",
+            type: "address",
+          },
+        ],
+        internalType: "struct SuperToken.transaction[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "address_",
+        type: "address",
+      },
+    ],
+    name: "getOutgoingStreams",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "uint256",
+            name: "flowRate",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "timestamp",
+            type: "uint256",
+          },
+          {
+            internalType: "bool",
+            name: "isOnGoing",
+            type: "bool",
+          },
+          {
+            internalType: "address",
+            name: "participant",
+            type: "address",
+          },
+        ],
+        internalType: "struct SuperToken.transaction[]",
+        name: "",
+        type: "tuple[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "getPriceInfo",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
       },
     ],
     stateMutability: "nonpayable",
@@ -342,6 +435,51 @@ export const ABI = [
         internalType: "address",
         name: "participant",
         type: "address",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "requestId",
+    outputs: [
+      {
+        internalType: "bytes32",
+        name: "",
+        type: "bytes32",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [],
+    name: "show",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "_requestId",
+        type: "bytes32",
+      },
+    ],
+    name: "showPriceOnRequestId",
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
       },
     ],
     stateMutability: "view",
@@ -486,7 +624,11 @@ export const ABI = [
     ],
     name: "wrap",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
+  },
+  {
+    stateMutability: "payable",
+    type: "receive",
   },
 ];

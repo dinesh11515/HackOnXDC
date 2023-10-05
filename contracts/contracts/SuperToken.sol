@@ -5,6 +5,7 @@ pragma solidity ^0.8.18;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "./oracle/IInvokeOracle.sol";
 
 contract SuperToken is Context, IERC20, IERC20Metadata {
     event tokenMinted(address receiver, uint value);
@@ -14,7 +15,6 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
         bool isOnGoing;
         address participant;
     }
-    address private immutable _underToken;
     mapping(address => transaction[]) public incomingStreams;
     mapping(address => transaction[]) public outgoingStreams;
 
@@ -27,6 +27,9 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
 
     string private _name;
     string private _symbol;
+    address CONTRACTADDR = 0x443446eB0b55fB47c0B8aB5814Da38eC9c2eC5D1;
+    bytes32 public requestId;
+    address private owner;
 
     /**
      * @dev Sets the values for {name} and {symbol}.
@@ -34,14 +37,10 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      * All two of these values are immutable: they can only be set once during
      * construction.
      */
-    constructor(
-        string memory name_,
-        string memory symbol_,
-        address underToken_
-    ) {
+    constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
-        _underToken = underToken_;
+        owner = msg.sender;
     }
 
     /* VIEW FUCNTIONS */
@@ -83,6 +82,18 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      */
     function totalSupply() public view virtual override returns (uint256) {
         return _totalSupply;
+    }
+
+    function getOutgoingStreams(
+        address address_
+    ) public view returns (transaction[] memory) {
+        return outgoingStreams[address_];
+    }
+
+    function getIncomingStreams(
+        address address_
+    ) public view returns (transaction[] memory) {
+        return incomingStreams[address_];
     }
 
     /**
@@ -146,15 +157,8 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
     /**
      * send real token in the contract to receive the 1:1 Super token (wrap tokens)
      */
-    function wrap(uint _amount) external {
-        require(
-            IERC20(_underToken).transferFrom(
-                msg.sender,
-                address(this),
-                _amount
-            ),
-            "wrap Transfer Failed"
-        );
+    function wrap(uint _amount) external payable {
+        require(msg.value >= _amount, "amount not matched");
         _mint(msg.sender, _amount);
 
         emit tokenMinted(msg.sender, _amount);
@@ -166,14 +170,29 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
      */
     function unwrap(uint _amount) external {
         _burn(msg.sender, _amount);
-        require(
-            IERC20(_underToken).transferFrom(
-                address(this),
-                msg.sender,
-                _amount
-            ),
-            "Unwrap Transfer Failed"
-        );
+        (bool sent, ) = payable(msg.sender).call{value: _amount}("");
+        require(sent, "Failed to send XDC");
+    }
+
+    //Fund this contract with sufficient PLI, before you trigger below function.
+    //Note, below function will not trigger if you do not put PLI in above contract address
+    function getPriceInfo() external returns (bytes32) {
+        require(msg.sender == owner, "Only owner can trigger this");
+        (requestId) = IInvokeOracle(CONTRACTADDR).requestData({
+            _caller: msg.sender
+        });
+        return requestId;
+    }
+
+    //This function will give you last stored value in the contract
+    function show() external view returns (uint256) {
+        return IInvokeOracle(CONTRACTADDR).showPrice();
+    }
+
+    function showPriceOnRequestId(
+        bytes32 _requestId
+    ) external view returns (uint256) {
+        return IInvokeOracle(CONTRACTADDR).showLatestPrice(_requestId);
     }
 
     /**
@@ -277,8 +296,8 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
         address to,
         uint256 amount
     ) public virtual override returns (bool) {
-        address owner = _msgSender();
-        _transfer(owner, to, amount);
+        address sender = _msgSender();
+        _transfer(sender, to, amount);
         return true;
     }
 
@@ -561,4 +580,8 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
         address to,
         uint256 amount
     ) internal virtual {}
+
+    receive() external payable {}
+
+    fallback() external payable {}
 }
