@@ -1,4 +1,4 @@
-export const superToken = "0xfd2a0E34286A18B31187592306DD5C4b7cB3ef2b";
+export const superToken = "0x3B36cCD468B5079fB0bb0b0460aD3C16a892b6dc";
 export const ABI = [
   {
     inputs: [

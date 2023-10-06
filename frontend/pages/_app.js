@@ -1,16 +1,16 @@
-import Layout from '@/components/Layout';
-import '@/styles/globals.css';
+import Layout from "@/components/Layout";
+import "@/styles/globals.css";
 import {
   EthereumClient,
   w3mConnectors,
   w3mProvider,
-} from '@web3modal/ethereum';
-import { Web3Modal } from '@web3modal/react';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
-import { xdcTestnet } from 'wagmi/chains';
+} from "@web3modal/ethereum";
+import { Web3Modal } from "@web3modal/react";
+import { configureChains, createConfig, WagmiConfig } from "wagmi";
+import { xdcTestnet, xdc } from "wagmi/chains";
 
-const chains = [xdcTestnet];
-const projectId = 'c1b3dd468ccc5a2f6adf26ffc141357b';
+const chains = [xdc];
+const projectId = "c1b3dd468ccc5a2f6adf26ffc141357b";
 
 const { publicClient } = configureChains(chains, [w3mProvider({ projectId })]);
 const wagmiConfig = createConfig({
@@ -30,10 +30,7 @@ export default function App({ Component, pageProps }) {
         </Layout>
       </WagmiConfig>
 
-      <Web3Modal
-        projectId={projectId}
-        ethereumClient={ethereumClient}
-      />
+      <Web3Modal projectId={projectId} ethereumClient={ethereumClient} />
     </>
   );
 }

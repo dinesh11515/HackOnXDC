@@ -280,6 +280,16 @@ contract SuperToken is Context, IERC20, IERC20Metadata {
                     (block.timestamp -
                         outgoingStreams[msg.sender][i].timestamp) *
                     outgoingStreams[msg.sender][i].flowRate;
+                _balances[msg.sender] -= int(
+                    (block.timestamp -
+                        outgoingStreams[msg.sender][i].timestamp) *
+                        outgoingStreams[msg.sender][i].flowRate
+                );
+                _balances[_receiver] += int(
+                    (block.timestamp -
+                        outgoingStreams[msg.sender][i].timestamp) *
+                        outgoingStreams[msg.sender][i].flowRate
+                );
             }
         }
     }
