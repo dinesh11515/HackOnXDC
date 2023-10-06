@@ -10,6 +10,7 @@ import { ABI, superToken } from "@/constants";
 const Dashboard = () => {
   const { address, isConnected } = useAccount();
   const [hydrate, setHydrate] = useState(false);
+  const [activeStreams, setActiveStreams] = useState([]);
   const [data, setData] = useState([]);
 
   const getData = async () => {
@@ -113,7 +114,7 @@ const Dashboard = () => {
               ))}
             </table>
           </div> */}
-
+          <div></div>
           <div className="flex flex-wrap gap-10">
             {data.map((i, index) => (
               <ActiveStream data={i} index={index} />

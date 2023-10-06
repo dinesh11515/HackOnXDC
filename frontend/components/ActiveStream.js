@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import React from "react";
 import { useAccount } from "wagmi";
 
-const ActiveStream = ({ data, index }) => {
+const ActiveStream = ({ data, index, isActive }) => {
   const { address } = useAccount();
   const router = useRouter();
 
@@ -14,9 +14,15 @@ const ActiveStream = ({ data, index }) => {
       }}
       className="bg-[#1C1D20] pb-8 px-8 rounded-2xl w-fit font-Poppins hover:bg-[#2a2b2f] cursor-pointer"
     >
-      <div className="bg-green-700/30 text-green-300 py-1 px-3 text-sm rounded-b-md w-fit mb-6">
-        Active
-      </div>
+      {isActive ? (
+        <div className="bg-green-700/30 text-green-300 py-1 px-3 text-sm rounded-b-md w-fit mb-6">
+          Active
+        </div>
+      ) : (
+        <div className="bg-red-700/30 text-red-300 py-1 px-3 text-sm rounded-b-md w-fit mb-6">
+          Not Active
+        </div>
+      )}
 
       <div className="flex items-center">
         <div className="flex gap-3 items-center bg-[#161719] p-2 rounded-md px-4">
