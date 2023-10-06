@@ -21,7 +21,6 @@ const Dashboard = () => {
         args: [address],
       });
       setData(dataStr);
-      console.log(data);
     } catch (e) {
       console.log("dashboard data", e);
     }

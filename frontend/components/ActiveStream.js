@@ -4,7 +4,6 @@ import React from "react";
 import { useAccount } from "wagmi";
 
 const ActiveStream = ({ data, index }) => {
-  console.log(data);
   const { address } = useAccount();
   const router = useRouter();
 
