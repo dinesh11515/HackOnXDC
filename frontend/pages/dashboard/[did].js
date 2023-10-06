@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import { etherUnits, formatEther, formatUnits } from 'viem';
 import { toast } from 'react-toastify';
 import CountUp from 'react-countup';
+import Loader from '@/components/Loader';
 const CurrentStream = ({}) => {
   const router = useRouter();
   const id = router.query.did;
@@ -16,6 +17,7 @@ const CurrentStream = ({}) => {
   const [balance, setBalance] = useState(0);
   const [data, setData] = useState();
   const [currentEndValue, setCurrentEndValue] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const getData = async () => {
     try {
@@ -28,18 +30,23 @@ const CurrentStream = ({}) => {
 
       console.log('dd', dataStr[id]);
       setData(dataStr[id]);
-      // if (!dataStr[id].isOnGoing) {
+    } catch (e) {
+      console.log('dashboard data', e);
+    }
+  };
+
+  const getBalance = async () => {
+    try {
       const balance = await readContract({
         address: superToken,
         abi: ABI,
         functionName: 'tokensSentTillDate',
-        args: [address, dataStr[id].participant],
+        args: [address, data?.participant],
       });
 
       setBalance(parseFloat(formatEther(BigInt(balance))).toFixed(6));
-      // }
-    } catch (e) {
-      console.log('dashboard data', e);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -53,9 +60,8 @@ const CurrentStream = ({}) => {
       const timestampInMilliseconds = BigInt(timestamp) * 1000n;
       const date = new Date(Number(timestampInMilliseconds));
 
-      // You can format the date as per your preference using Date methods
-      const formattedDate = date.toDateString(); // Converts to a string like "Tue Oct 05 2021"
-      const formattedTime = date.toLocaleTimeString(); // Converts to a string like "11:31:05 AM"
+      const formattedDate = date.toDateString();
+      const formattedTime = date.toLocaleTimeString();
       return [formattedDate, formattedTime];
     }
     return [];
@@ -63,6 +69,7 @@ const CurrentStream = ({}) => {
 
   const cancelStreamHandler = async () => {
     // logic here
+    setLoading(true);
     const { hash } = await writeContract({
       address: superToken,
       abi: ABI,
@@ -71,6 +78,7 @@ const CurrentStream = ({}) => {
     });
 
     await waitForTransaction({ hash });
+    setLoading(false);
     toast.success('Stream Cancelled');
   };
 
@@ -79,6 +87,10 @@ const CurrentStream = ({}) => {
       getData();
     }
   }, [address, id]);
+
+  // useEffect(() => {
+  //   getBalance();
+  // }, [address, data]);
 
   useEffect(() => {
     const updateEndValue = () => {
@@ -89,11 +101,10 @@ const CurrentStream = ({}) => {
     };
 
     updateEndValue();
-
-    const interval = setInterval(updateEndValue, 5000);
-
-    return () => clearInterval(interval);
+    getBalance();
   }, [data]);
+
+  console.log('balance', balance);
 
   return (
     <div className='bg-[#141414] h-[100vh] flex flex-col text-white font-Poppins px-20 py-20  items-center'>
@@ -112,7 +123,7 @@ const CurrentStream = ({}) => {
               <CountUp
                 start={balance}
                 end={currentEndValue}
-                duration={20}
+                duration={2000}
                 separator=' '
                 decimals={8}
                 delay={0.1}
@@ -190,7 +201,7 @@ const CurrentStream = ({}) => {
           <button
             onClick={cancelStreamHandler}
             className='bg-red-400/30 mt-10 w-full text-red-300 py-3 hover:bg-red-500/20  tracking-wider   rounded-lg '>
-            Cancel Stream
+            {loading ? <Loader inComp /> : 'Cancel Stream'}
           </button>
         )}
       </div>
