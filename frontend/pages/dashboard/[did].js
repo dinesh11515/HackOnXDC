@@ -11,6 +11,7 @@ const CurrentStream = ({}) => {
   const { address, isConnected } = useAccount();
   const [hydrate, setHydrate] = useState(false);
   const [data, setData] = useState();
+  const [count, setCount] = useState(0);
 
   const getData = async () => {
     try {
@@ -53,6 +54,19 @@ const CurrentStream = ({}) => {
       getData();
     }
   }, [address, id]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newCount = parseFloat(
+        formatEther(BigInt(data?.flowRate || 0) * BigInt(btwTime()))
+      ).toFixed(6);
+
+      setCount(newCount);
+    }, 1);
+
+    return () => clearInterval(interval);
+  }, [data, address, id]);
+
   return (
     <div className='bg-[#141414] h-[100vh] flex flex-col text-white font-Poppins px-20 py-20  items-center'>
       <div className='mt-28 w-[700px]'>
@@ -65,11 +79,7 @@ const CurrentStream = ({}) => {
             alt='usdt'
             className='rounded-full border-2 border-yellow-400'
           />
-          <p className='text-6xl'>
-            {parseFloat(
-              formatEther(BigInt(data?.flowRate || 0) * BigInt(btwTime()))
-            ).toFixed(6)}
-          </p>
+          <p className='text-6xl'>{count}</p>
           <p className='mt-4 text-green-400 text-lg'>sXDC</p>
         </div>
 
