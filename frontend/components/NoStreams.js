@@ -1,6 +1,8 @@
+import { useRouter } from 'next/router';
 import React from 'react';
 
 const NoStreams = () => {
+  const router = useRouter();
   return (
     <div className='bg-[#1C1D20] py-16 flex justify-center flex-col items-center rounded-2xl'>
       <h2 className='text-xl mb-1'>No streams yet!</h2>

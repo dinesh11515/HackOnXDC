@@ -72,7 +72,7 @@ const Sidebar = () => {
             openMenu && 'w-fit py-2 pr-2'
           }`}>
           <Image
-            src='/jazz.png'
+            src='/gif3.webp'
             alt='img'
             height={35}
             width={35}
