@@ -54,7 +54,7 @@ const Dashboard = () => {
           {data ? (
             <div className="flex flex-wrap gap-10">
               {data.map((i, index) => (
-                <ActiveStream data={i} index={index} />
+                <ActiveStream data={i} index={index} isActive={i.isOnGoing} />
               ))}
             </div>
           ) : (

@@ -4,13 +4,14 @@ import { useAccount } from "wagmi";
 import { readContract, writeContract, waitForTransaction } from "@wagmi/core";
 import { ABI, superToken } from "@/constants";
 import { useRouter } from "next/router";
-import { formatEther, formatUnits } from "viem";
+import { etherUnits, formatEther, formatUnits } from "viem";
 import { toast } from "react-toastify";
 const CurrentStream = ({}) => {
   const router = useRouter();
   const id = router.query.did;
   const { address, isConnected } = useAccount();
   const [hydrate, setHydrate] = useState(false);
+  const [balance, setBalance] = useState(0);
   const [data, setData] = useState();
   const [count, setCount] = useState(0);
 
@@ -23,7 +24,18 @@ const CurrentStream = ({}) => {
         args: [address],
       });
 
+      console.log("dd", dataStr[id]);
       setData(dataStr[id]);
+      if (!dataStr[id].isOnGoing) {
+        const balance = await readContract({
+          address: superToken,
+          abi: ABI,
+          functionName: "tokensSentTillDate",
+          args: [address, dataStr[id].participant],
+        });
+
+        setBalance(parseFloat(formatEther(BigInt(balance))).toFixed(6));
+      }
     } catch (e) {
       console.log("dashboard data", e);
     }
@@ -90,7 +102,7 @@ const CurrentStream = ({}) => {
             alt="usdt"
             className="rounded-full border-2 border-yellow-400"
           />
-          <p className="text-6xl">{count}</p>
+          <p className="text-6xl">{data?.isOnGoing ? count : balance}</p>
           <p className="mt-4 text-green-400 text-lg">sXDC</p>
         </div>
 
@@ -150,12 +162,14 @@ const CurrentStream = ({}) => {
           </div>{" "}
         </div>
 
-        <button
-          onClick={cancelStreamHandler}
-          className="bg-red-400/30 mt-10 w-full text-red-300 py-3 hover:bg-red-500/20  tracking-wider   rounded-lg "
-        >
-          Cancel Stream
-        </button>
+        {data?.isOnGoing && (
+          <button
+            onClick={cancelStreamHandler}
+            className="bg-red-400/30 mt-10 w-full text-red-300 py-3 hover:bg-red-500/20  tracking-wider   rounded-lg "
+          >
+            Cancel Stream
+          </button>
+        )}
       </div>
     </div>
   );
